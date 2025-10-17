@@ -8,11 +8,14 @@
 		<div
 			ref="entryPoint"
 			class="cdx-language-selector__entry-point"
-			:class="{ 'cdx-language-selector__entry-point--expanded': expanded }"
+			:class="{
+				'cdx-language-selector__entry-point--expanded': expanded,
+				'cdx-language-selector__entry-point--disabled': computedDisabled
+			}"
 			:aria-expanded="expanded"
 			:aria-controls="menuId"
-			:disabled="computedDisabled"
-			tabindex="0"
+			:aria-disabled="computedDisabled"
+			:tabindex="computedDisabled ? -1 : 0"
 			role="button"
 			@click="onEntryPointClick"
 			@keydown="onEntryPointKeydown"
@@ -70,7 +73,10 @@
 						v-for="lang in suggestedLanguages"
 						:key="lang.value"
 						class="cdx-language-selector__suggested-item"
-						:class="{ 'cdx-language-selector__suggested-item--selected': lang.value === selected }"
+						:class="{
+							'cdx-language-selector__suggested-item--selected':
+								lang.value === selected
+						}"
 						@click="selectLanguage( lang.value )"
 					>
 						{{ lang.label }}
@@ -88,7 +94,10 @@
 						v-for="lang in filteredLanguages"
 						:key="lang.value"
 						class="cdx-language-selector__language-item"
-						:class="{ 'cdx-language-selector__language-item--selected': lang.value === selected }"
+						:class="{
+							'cdx-language-selector__language-item--selected':
+								lang.value === selected
+						}"
 						@click="selectLanguage( lang.value )"
 					>
 						<span class="cdx-language-selector__language-name">{{ lang.label }}</span>
@@ -97,7 +106,10 @@
 			</div>
 
 			<!-- No Results -->
-			<div v-if="searchQuery && filteredLanguages.length === 0" class="cdx-language-selector__no-results">
+			<div
+				v-if="searchQuery && filteredLanguages.length === 0"
+				class="cdx-language-selector__no-results"
+			>
 				No languages found
 			</div>
 		</div>
@@ -159,7 +171,7 @@ export default defineComponent( {
 		 */
 		selected: {
 			type: [ String, Number ] as PropType<string|number>,
-			required: true
+			default: ''
 		},
 
 		/**
@@ -414,7 +426,7 @@ export default defineComponent( {
 			border-color: @border-color-progressive;
 		}
 
-		&[disabled] {
+		&--disabled {
 			background-color: @background-color-disabled;
 			border-color: @border-color-disabled;
 			cursor: not-allowed;
@@ -543,10 +555,6 @@ export default defineComponent( {
 		max-height: 200px;
 		overflow-y: auto;
         padding: @spacing-100;
-	}
-
-	&__languages-list {
-		//
 	}
 
 	&__language-item {

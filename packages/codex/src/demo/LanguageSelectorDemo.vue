@@ -25,7 +25,7 @@
 import { ref } from 'vue';
 import { CdxLanguageSelector } from '../lib';
 
-const selectedLanguage = ref( null );
+const selectedLanguage = ref( '' );
 
 const suggestedLanguages = [
 	{ value: 'en', label: 'English' },
