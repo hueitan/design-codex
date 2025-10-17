@@ -21,6 +21,7 @@
 			<image-demo />
 			<info-chip-demo />
 			<label-demo />
+			<language-selector-demo />
 			<link-demo />
 			<lookup-demo />
 			<multiselect-lookup-demo />
@@ -83,6 +84,7 @@ import IconDemo from './IconDemo.vue';
 import ImageDemo from './ImageDemo.vue';
 import InfoChipDemo from './InfoChipDemo.vue';
 import LabelDemo from './LabelDemo.vue';
+import LanguageSelectorDemo from './LanguageSelectorDemo.vue';
 import LookupDemo from './LookupDemo.vue';
 import MenuDemo from './MenuDemo.vue';
 import MenuItemDemo from './MenuItemDemo.vue';
@@ -123,6 +125,8 @@ const demoSections = [
 	{ name: 'Image', id: '#cdx-image' },
 	{ name: 'InfoChip', id: '#cdx-info-chip' },
 	{ name: 'Label', id: '#cdx-label' },
+	{ name: 'LanguageSelector', id: '#cdx-language-selector' },
+
 	{ name: 'Link', id: '#cdx-link' },
 	{ name: 'Lookup', id: '#cdx-lookup' },
 	{ name: 'MultiselectLookup', id: '#cdx-multiselect-lookup' },

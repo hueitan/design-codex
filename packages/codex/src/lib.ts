@@ -32,6 +32,7 @@ import CdxImage from './components/image/Image.vue';
 import CdxInfoChip from './components/info-chip/InfoChip.vue';
 import CdxLabel from './components/label/Label.vue';
 import CdxLookup from './components/lookup/Lookup.vue';
+import CdxLanguageSelector from './components/language-selector/LanguageSelector.vue';
 import CdxMenu from './components/menu/Menu.vue';
 import CdxMenuButton from './components/menu-button/MenuButton.vue';
 import CdxMenuItem from './components/menu-item/MenuItem.vue';
@@ -133,6 +134,7 @@ export {
 	CdxImage,
 	CdxInfoChip,
 	CdxLabel,
+	CdxLanguageSelector,
 	CdxLookup,
 	CdxMenu,
 	CdxMenuButton,
