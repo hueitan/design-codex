@@ -4,34 +4,34 @@
 		:class="rootClasses"
 		:style="rootStyle"
 	>
-		<!-- Entry Point -->
+		<!-- Input -->
 		<div
-			ref="entryPoint"
-			class="cdx-language-selector__entry-point"
+			ref="input"
+			class="cdx-language-selector__input"
 			:class="{
-				'cdx-language-selector__entry-point--expanded': expanded,
-				'cdx-language-selector__entry-point--disabled': computedDisabled
+				'cdx-language-selector__input--expanded': expanded,
+				'cdx-language-selector__input--disabled': computedDisabled
 			}"
 			:aria-expanded="expanded"
 			:aria-controls="menuId"
 			:aria-disabled="computedDisabled"
 			:tabindex="computedDisabled ? -1 : 0"
 			role="button"
-			@click="onEntryPointClick"
-			@keydown="onEntryPointKeydown"
-			@focus="onEntryPointFocus"
-			@blur="onEntryPointBlur"
+			@click="onInputClick"
+			@keydown="onInputKeydown"
+			@focus="onInputFocus"
+			@blur="onInputBlur"
 		>
-			<div class="cdx-language-selector__entry-content">
-				<div class="cdx-language-selector__entry-icon">
+			<div class="cdx-language-selector__input-content">
+				<div class="cdx-language-selector__input-icon">
 					<cdx-icon :icon="cdxIconSearch" />
 				</div>
-				<span class="cdx-language-selector__entry-text">
+				<span class="cdx-language-selector__input-text">
 					{{ selectedLanguageLabel || `Search languages` }}
 				</span>
 			</div>
 			<cdx-icon
-				class="cdx-language-selector__entry-arrow"
+				class="cdx-language-selector__input-arrow"
 				:icon="cdxIconExpand"
 			/>
 		</div>
@@ -241,7 +241,7 @@ export default defineComponent( {
 	],
 
 	setup( props, { emit, attrs } ) {
-		const entryPoint = ref<HTMLDivElement>();
+		const input = ref<HTMLDivElement>();
 		const menu = ref<HTMLDivElement>();
 		const searchInput = ref<HTMLInputElement>();
 		const menuId = useId();
@@ -287,7 +287,7 @@ export default defineComponent( {
 		} );
 
 		// Event handlers
-		function onEntryPointClick(): void {
+		function onInputClick(): void {
 			if ( computedDisabled.value ) {
 				return;
 			}
@@ -300,23 +300,23 @@ export default defineComponent( {
 			}
 		}
 
-		function onEntryPointKeydown( e: KeyboardEvent ): void {
+		function onInputKeydown( e: KeyboardEvent ): void {
 			if ( computedDisabled.value ) {
 				return;
 			}
 			if ( e.key === 'Enter' || e.key === ' ' ) {
 				e.preventDefault();
-				onEntryPointClick();
+				onInputClick();
 			} else if ( e.key === 'Escape' ) {
 				expanded.value = false;
 			}
 		}
 
-		function onEntryPointFocus( event: FocusEvent ): void {
+		function onInputFocus( event: FocusEvent ): void {
 			emit( 'focus', event );
 		}
 
-		function onEntryPointBlur( event: FocusEvent ): void {
+		function onInputBlur( event: FocusEvent ): void {
 			// Close menu when focus leaves the component
 			setTimeout( () => {
 				if ( !menu.value?.contains( document.activeElement ) ) {
@@ -335,7 +335,7 @@ export default defineComponent( {
 		function onSearchKeydown( e: KeyboardEvent ): void {
 			if ( e.key === 'Escape' ) {
 				expanded.value = false;
-				entryPoint.value?.focus();
+				input.value?.focus();
 			}
 		}
 
@@ -343,7 +343,7 @@ export default defineComponent( {
 			modelWrapper.value = value;
 			expanded.value = false;
 			searchQuery.value = '';
-			entryPoint.value?.focus();
+			input.value?.focus();
 		}
 
 		// Close menu when clicking outside
@@ -352,7 +352,7 @@ export default defineComponent( {
 				expanded.value &&
 				menu.value &&
 				!menu.value.contains( event.target as Node ) &&
-				!entryPoint.value?.contains( event.target as Node )
+				!input.value?.contains( event.target as Node )
 			) {
 				expanded.value = false;
 			}
@@ -368,7 +368,7 @@ export default defineComponent( {
 		} );
 
 		return {
-			entryPoint,
+			input,
 			menu,
 			searchInput,
 			menuId,
@@ -377,10 +377,10 @@ export default defineComponent( {
 			computedDisabled,
 			selectedLanguageLabel,
 			filteredLanguages,
-			onEntryPointClick,
-			onEntryPointKeydown,
-			onEntryPointFocus,
-			onEntryPointBlur,
+			onInputClick,
+			onInputKeydown,
+			onInputFocus,
+			onInputBlur,
 			onSearchInput,
 			onSearchKeydown,
 			selectLanguage,
@@ -402,7 +402,7 @@ export default defineComponent( {
 	width: 100%;
 	max-width: 300px;
 
-	&__entry-point {
+	&__input {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -434,29 +434,29 @@ export default defineComponent( {
 		}
 	}
 
-	&__entry-content {
+	&__input-content {
 		display: flex;
 		align-items: center;
 		gap: @spacing-50;
 	}
 
-	&__entry-icon {
+	&__input-icon {
 		display: flex;
 		align-items: center;
 		color: @color-subtle;
 	}
 
-	&__entry-text {
+	&__input-text {
 		font-size: @font-size-medium;
 		color: @color-base;
 	}
 
-	&__entry-arrow {
+	&__input-arrow {
 		color: @color-subtle;
 		transition: transform 0.2s ease;
 	}
 
-	&--expanded &__entry-arrow {
+	&--expanded &__input-arrow {
 		transform: rotate(180deg);
 	}
 
@@ -593,7 +593,7 @@ export default defineComponent( {
 	}
 
 	&--disabled {
-		.cdx-language-selector__entry-point {
+		.cdx-language-selector__input {
 			background-color: @background-color-disabled;
 			border-color: @border-color-disabled;
 			cursor: not-allowed;
