@@ -5,34 +5,27 @@
 		:style="rootStyle"
 	>
 		<!-- Input -->
-		<div
-			ref="input"
-			class="cdx-language-selector__input"
-			:class="{
-				'cdx-language-selector__input--expanded': expanded,
-				'cdx-language-selector__input--disabled': computedDisabled
-			}"
-			:aria-expanded="expanded"
-			:aria-controls="menuId"
-			:aria-disabled="computedDisabled"
-			:tabindex="computedDisabled ? -1 : 0"
-			role="button"
-			@click="onInputClick"
-			@keydown="onInputKeydown"
-			@focus="onInputFocus"
-			@blur="onInputBlur"
-		>
-			<div class="cdx-language-selector__input-content">
-				<div class="cdx-language-selector__input-icon">
-					<cdx-icon :icon="cdxIconSearch" />
-				</div>
-				<span class="cdx-language-selector__input-text">
-					{{ selectedLanguageLabel || `Search languages` }}
-				</span>
-			</div>
-			<cdx-icon
-				class="cdx-language-selector__input-arrow"
-				:icon="cdxIconExpand"
+		<div class="cdx-language-selector__input-wrapper" @click="onInputClick">
+			<cdx-text-input
+				ref="input"
+				v-model="inputValue"
+				class="cdx-language-selector__input"
+				:class="{
+					'cdx-language-selector__input--expanded': expanded,
+					'cdx-language-selector__input--disabled': computedDisabled
+				}"
+				input-type="search"
+				:start-icon="cdxIconSearch"
+				:end-icon="cdxIconExpand"
+				:disabled="computedDisabled"
+				:status="status"
+				placeholder="Search languages"
+				v-bind="otherAttrs"
+				@input="onMainInput"
+				@change="onMainChange"
+				@focus="onInputFocus"
+				@blur="onInputBlur"
+				@keydown="onInputKeydown"
 			/>
 		</div>
 
@@ -43,24 +36,6 @@
 			ref="menu"
 			class="cdx-language-selector__menu"
 		>
-			<!-- Search Section -->
-			<div class="cdx-language-selector__search-section">
-				<div class="cdx-language-selector__search-wrapper">
-					<cdx-icon
-						class="cdx-language-selector__search-icon"
-						:icon="cdxIconSearch"
-					/>
-					<input
-						ref="searchInput"
-						v-model="searchQuery"
-						class="cdx-language-selector__search-input"
-						placeholder="Search languages"
-						@input="onSearchInput"
-						@keydown="onSearchKeydown"
-					>
-				</div>
-			</div>
-
 			<!-- Suggested Languages -->
 			<div
 				v-if="!searchQuery && suggestedLanguages.length > 0"
@@ -128,7 +103,7 @@ import {
 } from 'vue';
 import { cdxIconExpand, cdxIconSearch } from '@wikimedia/codex-icons';
 
-import CdxIcon from '../icon/Icon.vue';
+import CdxTextInput from '../text-input/TextInput.vue';
 
 import useModelWrapper from '../../composables/useModelWrapper';
 import useSplitAttributes from '../../composables/useSplitAttributes';
@@ -146,7 +121,7 @@ const statusValidator = makeStringTypeValidator( ValidationStatusTypes );
 export default defineComponent( {
 	name: 'CdxLanguageSelector',
 	components: {
-		CdxIcon
+		CdxTextInput
 	},
 
 	/**
@@ -243,7 +218,6 @@ export default defineComponent( {
 	setup( props, { emit, attrs } ) {
 		const input = ref<HTMLDivElement>();
 		const menu = ref<HTMLDivElement>();
-		const searchInput = ref<HTMLInputElement>();
 		const menuId = useId();
 		const selectedProp = toRef( props, 'selected' );
 		const modelWrapper = useModelWrapper( selectedProp, emit, 'update:selected' );
@@ -265,12 +239,29 @@ export default defineComponent( {
 		// Get helpers from useSplitAttributes.
 		const {
 			rootClasses,
-			rootStyle
+			rootStyle,
+			otherAttrs
 		} = useSplitAttributes( attrs, internalClasses );
 
 		const selectedLanguageLabel = computed( () => {
-			const selectedItem = props.menuItems.find( ( item ) => item.value === modelWrapper.value );
+			const selectedItem = props.menuItems.find(
+				( item ) => item.value === modelWrapper.value
+			);
 			return selectedItem?.label;
+		} );
+
+		const inputValue = computed( {
+			get: () => {
+				// If we have a search query, show it
+				if ( searchQuery.value ) {
+					return searchQuery.value;
+				}
+				// Otherwise show the selected language
+				return selectedLanguageLabel.value ?? '';
+			},
+			set: ( value: string ) => {
+				searchQuery.value = value;
+			}
 		} );
 
 		// Filter languages based on search query
@@ -280,10 +271,12 @@ export default defineComponent( {
 			}
 
 			const query = searchQuery.value.toLowerCase();
-			return props.menuItems.filter( ( item ) => item.label?.toLowerCase().includes( query ) ??
-				item.value.toString().toLowerCase().includes( query ) ??
-				item.description?.toLowerCase().includes( query )
-			);
+			return props.menuItems.filter( ( item ) => {
+				const labelMatch = item.label?.toLowerCase().includes( query );
+				const valueMatch = item.value.toString().toLowerCase().includes( query );
+				const descMatch = item.description?.toLowerCase().includes( query );
+				return labelMatch ?? valueMatch ?? descMatch;
+			} );
 		} );
 
 		// Event handlers
@@ -292,23 +285,32 @@ export default defineComponent( {
 				return;
 			}
 			expanded.value = !expanded.value;
-			if ( expanded.value ) {
-				// Focus search input when opening
-				setTimeout( () => {
-					searchInput.value?.focus();
-				}, 0 );
+		}
+
+		function onMainInput( event: Event ): void {
+			// Open dropdown when user starts typing
+			if ( !expanded.value ) {
+				expanded.value = true;
 			}
+			emit( 'input', event );
+		}
+
+		function onMainChange( event: Event ): void {
+			emit( 'change', event );
 		}
 
 		function onInputKeydown( e: KeyboardEvent ): void {
 			if ( computedDisabled.value ) {
 				return;
 			}
-			if ( e.key === 'Enter' || e.key === ' ' ) {
-				e.preventDefault();
-				onInputClick();
-			} else if ( e.key === 'Escape' ) {
+			if ( e.key === 'Escape' ) {
 				expanded.value = false;
+			} else if ( e.key === 'ArrowDown' ) {
+				e.preventDefault();
+				expanded.value = true;
+			} else if ( e.key === 'Enter' || e.key === ' ' ) {
+				e.preventDefault();
+				expanded.value = !expanded.value;
 			}
 		}
 
@@ -326,24 +328,14 @@ export default defineComponent( {
 			emit( 'blur', event );
 		}
 
-		function onSearchInput( event: Event ): void {
-			const target = event.target as HTMLInputElement;
-			searchQuery.value = target.value;
-			emit( 'input', event );
-		}
-
-		function onSearchKeydown( e: KeyboardEvent ): void {
-			if ( e.key === 'Escape' ) {
-				expanded.value = false;
-				input.value?.focus();
-			}
-		}
-
 		function selectLanguage( value: string | number ): void {
 			modelWrapper.value = value;
 			expanded.value = false;
 			searchQuery.value = '';
-			input.value?.focus();
+			// Keep focus on the input after selection
+			setTimeout( () => {
+				input.value?.focus();
+			}, 0 );
 		}
 
 		// Close menu when clicking outside
@@ -370,26 +362,38 @@ export default defineComponent( {
 		return {
 			input,
 			menu,
-			searchInput,
 			menuId,
 			expanded,
 			searchQuery,
 			computedDisabled,
-			selectedLanguageLabel,
+			inputValue,
 			filteredLanguages,
 			modelWrapper,
 			onInputClick,
+			onMainInput,
+			onMainChange,
 			onInputKeydown,
 			onInputFocus,
 			onInputBlur,
-			onSearchInput,
-			onSearchKeydown,
 			selectLanguage,
 			cdxIconExpand,
 			cdxIconSearch,
 			rootClasses,
-			rootStyle
+			rootStyle,
+			otherAttrs
 		};
+	},
+
+	methods: {
+		/**
+		 * Focus the component's main input element.
+		 *
+		 * @public
+		 */
+		focus(): void {
+			const input = this.$refs.input as InstanceType<typeof CdxTextInput>;
+			input.focus();
+		}
 	}
 } );
 </script>
@@ -403,62 +407,85 @@ export default defineComponent( {
 	width: 100%;
 	max-width: 300px;
 
+	&__input-wrapper {
+		position: relative;
+		width: 100%;
+	}
+
 	&__input {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding: @spacing-75 @spacing-100;
-		border: 1px solid @border-color-base;
-		border-radius: @border-radius-base;
-		background-color: @background-color-base;
 		cursor: pointer;
-		transition: border-color 0.2s ease;
 
-		&:hover {
-			border-color: @border-color-progressive;
-		}
+		// Enhanced TextInput styling
+		.cdx-text-input__input {
+			cursor: pointer;
+			transition: border-color 0.2s ease, box-shadow 0.2s ease;
 
-		&:focus {
-			outline: 2px solid @outline-color-progressive--focus;
-			outline-offset: 2px;
+			&:hover {
+				border-color: @border-color-progressive;
+			}
+
+			&:focus {
+				border-color: @border-color-progressive;
+				box-shadow: 0 0 0 2px @outline-color-progressive--focus;
+			}
+
+			&::placeholder {
+				color: @color-subtle;
+				font-style: italic;
+			}
 		}
 
 		&--expanded {
-			border-color: @border-color-progressive;
+			.cdx-text-input__input {
+				border-color: @border-color-progressive;
+				box-shadow: 0 0 0 2px @outline-color-progressive--focus;
+			}
 		}
 
 		&--disabled {
-			background-color: @background-color-disabled;
-			border-color: @border-color-disabled;
-			cursor: not-allowed;
-			opacity: 0.6;
+			.cdx-text-input__input {
+				background-color: @background-color-disabled;
+				border-color: @border-color-disabled;
+				cursor: not-allowed;
+				opacity: 0.6;
+
+				&:hover {
+					border-color: @border-color-disabled;
+				}
+
+				&:focus {
+					border-color: @border-color-disabled;
+					box-shadow: none;
+				}
+			}
 		}
-	}
 
-	&__input-content {
-		display: flex;
-		align-items: center;
-		gap: @spacing-50;
-	}
+		// Rotate the end icon when expanded
+		&--expanded .cdx-text-input__end-icon {
+			transform: rotate(180deg);
+			transition: transform 0.2s ease;
+		}
 
-	&__input-icon {
-		display: flex;
-		align-items: center;
-		color: @color-subtle;
-	}
+		// Style the icons
+		.cdx-text-input__start-icon,
+		.cdx-text-input__end-icon {
+			color: @color-subtle;
+			transition: color 0.2s ease;
+		}
 
-	&__input-text {
-		font-size: @font-size-medium;
-		color: @color-base;
-	}
+		&:hover {
+			.cdx-text-input__start-icon,
+			.cdx-text-input__end-icon {
+				color: @color-base;
+			}
+		}
 
-	&__input-arrow {
-		color: @color-subtle;
-		transition: transform 0.2s ease;
-	}
-
-	&--expanded &__input-arrow {
-		transform: rotate(180deg);
+		&--expanded {
+			.cdx-text-input__start-icon,
+			.cdx-text-input__end-icon {
+				color: @color-base;
+			}
+		}
 	}
 
 	&__menu {
@@ -474,39 +501,6 @@ export default defineComponent( {
 		box-shadow: @box-shadow-drop-medium;
 		max-height: 400px;
 		overflow: hidden;
-	}
-
-	&__search-section {
-		padding: @spacing-100;
-		border-bottom: 1px solid @border-color-subtle;
-	}
-
-	&__search-wrapper {
-		position: relative;
-		display: flex;
-		align-items: center;
-	}
-
-	&__search-icon {
-		position: absolute;
-		left: @spacing-75;
-		color: @color-subtle;
-		pointer-events: none;
-	}
-
-	&__search-input {
-		width: 100%;
-		padding: @spacing-75 @spacing-75 @spacing-75 @spacing-200;
-		border: 1px solid @border-color-base;
-		border-radius: @border-radius-base;
-		font-size: @font-size-medium;
-		background-color: @background-color-base;
-
-		&:focus {
-			outline: 2px solid @outline-color-progressive--focus;
-			outline-offset: 2px;
-			border-color: @border-color-progressive;
-		}
 	}
 
 	&__suggested {
