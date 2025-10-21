@@ -75,7 +75,7 @@
 						class="cdx-language-selector__suggested-item"
 						:class="{
 							'cdx-language-selector__suggested-item--selected':
-								lang.value === selected
+								lang.value === modelWrapper
 						}"
 						@click="selectLanguage( lang.value )"
 					>
@@ -96,7 +96,7 @@
 						class="cdx-language-selector__language-item"
 						:class="{
 							'cdx-language-selector__language-item--selected':
-								lang.value === selected
+								lang.value === modelWrapper
 						}"
 						@click="selectLanguage( lang.value )"
 					>
@@ -269,7 +269,7 @@ export default defineComponent( {
 		} = useSplitAttributes( attrs, internalClasses );
 
 		const selectedLanguageLabel = computed( () => {
-			const selectedItem = props.menuItems.find( ( item ) => item.value === props.selected );
+			const selectedItem = props.menuItems.find( ( item ) => item.value === modelWrapper.value );
 			return selectedItem?.label;
 		} );
 
@@ -377,6 +377,7 @@ export default defineComponent( {
 			computedDisabled,
 			selectedLanguageLabel,
 			filteredLanguages,
+			modelWrapper,
 			onInputClick,
 			onInputKeydown,
 			onInputFocus,
