@@ -36,47 +36,71 @@
 			ref="menu"
 			class="cdx-language-selector__menu"
 		>
-			<!-- Suggested Languages -->
-			<div
-				v-if="!searchQuery && suggestedLanguages.length > 0"
-				class="cdx-language-selector__suggested">
-				<div class="cdx-language-selector__section-header">
-					Suggested
-				</div>
-				<div class="cdx-language-selector__suggested-grid">
-					<button
-						v-for="lang in suggestedLanguages"
-						:key="lang.value"
-						class="cdx-language-selector__suggested-item"
-						:class="{
-							'cdx-language-selector__suggested-item--selected':
-								lang.value === modelWrapper
-						}"
-						@click="selectLanguage( lang.value )"
-					>
-						{{ lang.label }}
-					</button>
-				</div>
-			</div>
-
-			<!-- All Languages List -->
+			<!-- Languages List -->
 			<div class="cdx-language-selector__languages">
-				<div class="cdx-language-selector__section-header">
-					{{ searchQuery ? 'Search Results' : 'All languages' }}
-				</div>
 				<div class="cdx-language-selector__languages-list">
-					<button
-						v-for="lang in filteredLanguages"
-						:key="lang.value"
-						class="cdx-language-selector__language-item"
-						:class="{
-							'cdx-language-selector__language-item--selected':
-								lang.value === modelWrapper
-						}"
-						@click="selectLanguage( lang.value )"
-					>
-						<span class="cdx-language-selector__language-name">{{ lang.label }}</span>
-					</button>
+					<!-- Suggested Languages Section -->
+					<template v-if="!searchQuery && suggestedLanguages.length > 0">
+						<div class="cdx-language-selector__section-header">
+							Suggested
+						</div>
+						<button
+							v-for="lang in suggestedLanguages"
+							:key="lang.value"
+							class="cdx-language-selector__language-item"
+							:class="{
+								'cdx-language-selector__language-item--selected':
+									lang.value === modelWrapper
+							}"
+							@click="selectLanguage( lang.value )"
+						>
+							<span class="cdx-language-selector__language-name">
+								{{ lang.label }}
+							</span>
+						</button>
+					</template>
+
+					<!-- All Languages Section -->
+					<template v-if="!searchQuery">
+						<div class="cdx-language-selector__section-header">
+							All
+						</div>
+						<button
+							v-for="lang in allLanguages"
+							:key="lang.value"
+							class="cdx-language-selector__language-item"
+							:class="{
+								'cdx-language-selector__language-item--selected':
+									lang.value === modelWrapper
+							}"
+							@click="selectLanguage( lang.value )"
+						>
+							<span class="cdx-language-selector__language-name">
+								{{ lang.label }}
+							</span>
+						</button>
+					</template>
+
+					<!-- Search Results Section -->
+					<template v-if="searchQuery">
+						<div class="cdx-language-selector__section-header">
+							Search Results
+						</div>
+						<button
+							v-for="lang in filteredLanguages"
+							:key="lang.value"
+							class="cdx-language-selector__language-item"
+							:class="{
+								'cdx-language-selector__language-item--selected':
+									lang.value === modelWrapper
+							}"
+							@click="selectLanguage( lang.value )"
+						>
+							<span class="cdx-language-selector__language-name">
+								{{ lang.label }}
+							</span>
+						</button>
+					</template>
 				</div>
 			</div>
 
@@ -279,6 +303,12 @@ export default defineComponent( {
 			} );
 		} );
 
+		// All languages excluding suggested ones
+		const allLanguages = computed( () => {
+			const suggestedValues = props.suggestedLanguages.map( ( lang ) => lang.value );
+			return props.menuItems.filter( ( lang ) => !suggestedValues.includes( lang.value ) );
+		} );
+
 		// Event handlers
 		function onInputClick(): void {
 			if ( computedDisabled.value ) {
@@ -368,6 +398,7 @@ export default defineComponent( {
 			computedDisabled,
 			inputValue,
 			filteredLanguages,
+			allLanguages,
 			modelWrapper,
 			onInputClick,
 			onMainInput,
@@ -503,46 +534,16 @@ export default defineComponent( {
 		overflow: hidden;
 	}
 
-	&__suggested {
-		padding: @spacing-100;
-		border-bottom: 1px solid @border-color-subtle;
-	}
-
 	&__section-header {
 		font-size: @font-size-small;
 		font-weight: @font-weight-semi-bold;
 		color: @color-subtle;
-		margin-bottom: @spacing-75;
+		margin: @spacing-100 0 @spacing-75 0;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
-	}
 
-	&__suggested-grid {
-		display: grid;
-		grid-template-columns: 1fr 1fr;
-		gap: @spacing-50;
-	}
-
-	&__suggested-item {
-		padding: @spacing-75 @spacing-100;
-		border: 1px solid @border-color-subtle;
-		border-radius: @border-radius-base;
-		background-color: @background-color-base;
-		color: @color-base;
-		font-size: @font-size-medium;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: left;
-
-		&:hover {
-			background-color: @background-color-progressive-subtle;
-			border-color: @border-color-progressive;
-		}
-
-		&--selected {
-			background-color: @background-color-progressive;
-			color: @color-inverted;
-			border-color: @border-color-progressive;
+		&:first-child {
+			margin-top: 0;
 		}
 	}
 
