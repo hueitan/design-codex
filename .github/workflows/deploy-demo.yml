@@ -26,8 +26,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build all packages
-        run: npm run build-all
+      - name: Build dependencies for demo
+        run: |
+          # Build codex-icons (required by codex)
+          npm run build -w @wikimedia/codex-icons
+          # Build codex-design-tokens (required by codex for styles)
+          npm run build -w @wikimedia/codex-design-tokens
 
       - name: Build sandbox demo
         run: |
