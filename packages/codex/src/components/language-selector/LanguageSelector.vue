@@ -4,43 +4,67 @@
 		:class="rootClasses"
 		:style="rootStyle"
 	>
-		<!-- Input -->
-		<div
-			ref="inputWrapper"
-			class="cdx-language-selector__input-wrapper"
-			@click="onInputClick"
+		<!-- Trigger Button -->
+		<cdx-button
+			ref="buttonWrapper"
+			class="cdx-language-selector__trigger"
+			:disabled="computedDisabled"
+			@click="onButtonClick"
 		>
-			<cdx-text-input
-				ref="input"
-				v-model="inputValue"
-				class="cdx-language-selector__input"
-				:class="{
-					'cdx-language-selector__input--expanded': expanded,
-					'cdx-language-selector__input--disabled': computedDisabled
-				}"
-				input-type="search"
-				:start-icon="cdxIconSearch"
-				:end-icon="cdxIconExpand"
-				:disabled="computedDisabled"
-				:status="status"
-				placeholder="Search languages"
-				v-bind="otherAttrs"
-				@input="onMainInput"
-				@change="onMainChange"
-				@focus="onInputFocus"
-				@blur="onInputBlur"
-				@keydown="onInputKeydown"
-			/>
-		</div>
+			{{ selectedLanguageLabel || 'Select language' }}
+			<cdx-icon :icon="cdxIconExpand" />
+		</cdx-button>
 
 		<!-- Floating Dropdown Container -->
-		<teleport to="body">
+		<teleport :to="computedTarget" :disabled="renderInPlace">
 			<div
 				v-if="expanded"
 				ref="floatingContainer"
 				class="cdx-language-selector__container"
 				:style="floatingStyles"
 			>
+				<!-- Input Wrapper -->
+				<div
+					ref="inputWrapper"
+					class="cdx-language-selector__input-wrapper"
+				>
+					<cdx-text-input
+						ref="input"
+						v-model="inputValue"
+						class="cdx-language-selector__input"
+						:class="{
+							'cdx-language-selector__input--expanded': expanded,
+							'cdx-language-selector__input--disabled': computedDisabled
+						}"
+						input-type="search"
+						:start-icon="cdxIconSearch"
+						:disabled="computedDisabled"
+						:status="status"
+						placeholder="Search languages"
+						v-bind="otherAttrs"
+						@input="onMainInput"
+						@change="onMainChange"
+						@focus="onInputFocus"
+						@blur="onInputBlur"
+						@keydown="onInputKeydown"
+					/>
+				</div>
+
+				<!-- Header with Close Button -->
+				<header v-if="useCloseButton" class="cdx-language-selector__header">
+					<div class="cdx-language-selector__header__button-wrapper">
+						<cdx-button
+							class="cdx-language-selector__header__close-button"
+							weight="quiet"
+							type="button"
+							:aria-label="translatedCloseButtonLabel"
+							@click="close"
+						>
+							<cdx-icon :icon="cdxIconClose" />
+						</cdx-button>
+					</div>
+				</header>
+
 				<!-- Languages List -->
 				<div class="cdx-language-selector__languages">
 					<div class="cdx-language-selector__languages-list">
@@ -49,7 +73,7 @@
 							<div class="cdx-language-selector__section-header">
 								Suggested
 							</div>
-							<button
+							<div
 								v-for="lang in suggestedLanguages"
 								:key="lang.value"
 								class="cdx-language-selector__language-item"
@@ -57,12 +81,15 @@
 									'cdx-language-selector__language-item--selected':
 										lang.value === modelWrapper
 								}"
+								role="button"
+								tabindex="0"
 								@click="selectLanguage( lang.value )"
+								@keydown.enter="selectLanguage( lang.value )"
 							>
 								<span class="cdx-language-selector__language-name">
 									{{ lang.label }}
 								</span>
-							</button>
+							</div>
 						</template>
 
 						<!-- All Languages Section -->
@@ -70,7 +97,7 @@
 							<div class="cdx-language-selector__section-header">
 								All
 							</div>
-							<button
+							<div
 								v-for="lang in allLanguages"
 								:key="lang.value"
 								class="cdx-language-selector__language-item"
@@ -78,12 +105,15 @@
 									'cdx-language-selector__language-item--selected':
 										lang.value === modelWrapper
 								}"
+								role="button"
+								tabindex="0"
 								@click="selectLanguage( lang.value )"
+								@keydown.enter="selectLanguage( lang.value )"
 							>
 								<span class="cdx-language-selector__language-name">
 									{{ lang.label }}
 								</span>
-							</button>
+							</div>
 						</template>
 
 						<!-- Search Results Section -->
@@ -91,7 +121,7 @@
 							<div class="cdx-language-selector__section-header">
 								Search Results
 							</div>
-							<button
+							<div
 								v-for="lang in filteredLanguages"
 								:key="lang.value"
 								class="cdx-language-selector__language-item"
@@ -99,12 +129,15 @@
 									'cdx-language-selector__language-item--selected':
 										lang.value === modelWrapper
 								}"
+								role="button"
+								tabindex="0"
 								@click="selectLanguage( lang.value )"
+								@keydown.enter="selectLanguage( lang.value )"
 							>
 								<span class="cdx-language-selector__language-name">
 									{{ lang.label }}
 								</span>
-							</button>
+							</div>
 						</template>
 					</div>
 				</div>
@@ -124,23 +157,29 @@
 <script lang="ts">
 import {
 	PropType,
+	ComponentPublicInstance,
 	computed,
 	defineComponent,
+	inject,
 	ref,
 	toRef,
+	unref,
 	watch,
 	onUnmounted
 } from 'vue';
 import { useFloating, offset, flip, size, autoUpdate } from '@floating-ui/vue';
-import { cdxIconExpand, cdxIconSearch } from '@wikimedia/codex-icons';
+import { cdxIconExpand, cdxIconSearch, cdxIconClose } from '@wikimedia/codex-icons';
 
 import CdxTextInput from '../text-input/TextInput.vue';
+import CdxButton from '../button/Button.vue';
+import CdxIcon from '../icon/Icon.vue';
 
 import useModelWrapper from '../../composables/useModelWrapper';
 import useSplitAttributes from '../../composables/useSplitAttributes';
 import useFieldData from '../../composables/useFieldData';
+import useI18nWithOverride from '../../composables/useI18nWithOverride';
 
-import { MenuItemData, ValidationStatusType } from '../../types';
+import { MenuItemData, ValidationStatusType, TeleportTarget } from '../../types';
 import { ValidationStatusTypes } from '../../constants';
 import { makeStringTypeValidator } from '../../utils/stringTypeValidator';
 
@@ -152,7 +191,9 @@ const statusValidator = makeStringTypeValidator( ValidationStatusTypes );
 export default defineComponent( {
 	name: 'CdxLanguageSelector',
 	components: {
-		CdxTextInput
+		CdxTextInput,
+		CdxButton,
+		CdxIcon
 	},
 
 	/**
@@ -203,6 +244,33 @@ export default defineComponent( {
 			type: String as PropType<ValidationStatusType>,
 			default: 'default',
 			validator: statusValidator
+		},
+
+		/**
+		 * Add an icon-only close button to the container header.
+		 */
+		useCloseButton: {
+			type: Boolean,
+			default: false
+		},
+
+		/**
+		 * Visually-hidden label text for the icon-only close button in the header.
+		 *
+		 * Omit this prop to use the default value, "Close".
+		 */
+		closeButtonLabel: {
+			type: String,
+			default: 'Close'
+		},
+
+		/**
+		 * Whether to disable the use of teleport and render the container in its
+		 * original location in the document.
+		 */
+		renderInPlace: {
+			type: Boolean,
+			default: false
 		}
 	},
 
@@ -247,6 +315,7 @@ export default defineComponent( {
 	],
 
 	setup( props, { emit, attrs } ) {
+		const buttonWrapper = ref<InstanceType<typeof CdxButton>>();
 		const inputWrapper = ref<HTMLDivElement>();
 		const input = ref<HTMLDivElement>();
 		const floatingContainer = ref<HTMLDivElement>();
@@ -270,7 +339,16 @@ export default defineComponent( {
 		);
 
 		// Setup Floating UI positioning (inspired by Popover)
-		const { floatingStyles } = useFloating( inputWrapper, floatingContainer, {
+		// Use computed to unwrap the button element for Floating UI
+		const buttonElement = computed( () => {
+			if ( !buttonWrapper.value ) {
+				return null;
+			}
+			// Access $el property directly from component instance
+			const component = buttonWrapper.value as ComponentPublicInstance;
+			return component.$el as HTMLElement | null | undefined;
+		} );
+		const { floatingStyles } = useFloating( buttonElement, floatingContainer, {
 			placement: 'bottom-start',
 			middleware: [
 				offset( 4 ),
@@ -281,12 +359,12 @@ export default defineComponent( {
 					padding: clipPadding,
 					apply( { rects, elements, availableWidth, availableHeight } ) {
 						// Match input width and set responsive max-width and max-height
-						const referenceWidth = rects.reference.width;
+						// const referenceWidth = rects.reference.width;
 						// Max width possible is the availableWidth up to the max container width
 						const maxWidth = Math.min( maxContainerWidth, availableWidth );
 						Object.assign( elements.floating.style, {
-							width: `${ referenceWidth }px`,
-							maxWidth: `${ Math.max( minContainerWidth, maxWidth ) }px`,
+							// width: `${ referenceWidth }px`,
+							width: `${ Math.max( minContainerWidth, maxWidth ) }px`,
 							maxHeight: `${ Math.min(
 								maxContainerHeight,
 								Math.max( minContainerHeight, availableHeight )
@@ -353,7 +431,7 @@ export default defineComponent( {
 		} );
 
 		// Event handlers
-		function onInputClick(): void {
+		function onButtonClick(): void {
 			if ( computedDisabled.value ) {
 				return;
 			}
@@ -405,6 +483,23 @@ export default defineComponent( {
 			}, 0 );
 		}
 
+		/**
+		 * Close the container by collapsing it.
+		 */
+		function close(): void {
+			expanded.value = false;
+		}
+
+		const translatedCloseButtonLabel = useI18nWithOverride(
+			toRef( props, 'closeButtonLabel' ),
+			'cdx-language-selector-close-button-label',
+			'Close'
+		);
+
+		// Determine where to teleport the container to.
+		const providedTarget = inject<TeleportTarget>( 'CdxTeleportTarget', undefined );
+		const computedTarget = computed( () => unref( providedTarget ) ?? 'body' );
+
 		// Close on Escape key (inspired by Popover)
 		function handleKeydown( event: KeyboardEvent ): void {
 			if ( event.key === 'Escape' && expanded.value ) {
@@ -414,12 +509,17 @@ export default defineComponent( {
 
 		// Close on click outside (inspired by Popover)
 		function handleClickOutside( event: MouseEvent ): void {
+			// Access $el property directly from component instance
+			const buttonEl = buttonWrapper.value ?
+				( buttonWrapper.value as ComponentPublicInstance ).$el as
+					HTMLElement | null | undefined :
+				null;
 			if (
 				expanded.value &&
 				floatingContainer.value &&
-				inputWrapper.value &&
+				buttonEl &&
 				!floatingContainer.value.contains( event.target as Node ) &&
-				!inputWrapper.value.contains( event.target as Node )
+				!buttonEl.contains( event.target as Node )
 			) {
 				expanded.value = false;
 			}
@@ -442,6 +542,7 @@ export default defineComponent( {
 		} );
 
 		return {
+			buttonWrapper,
 			inputWrapper,
 			input,
 			floatingContainer,
@@ -449,19 +550,24 @@ export default defineComponent( {
 			searchQuery,
 			computedDisabled,
 			inputValue,
+			selectedLanguageLabel,
 			filteredLanguages,
 			allLanguages,
 			modelWrapper,
-			onInputClick,
+			onButtonClick,
 			onMainInput,
 			onMainChange,
 			onInputKeydown,
 			onInputFocus,
 			onInputBlur,
 			selectLanguage,
+			close,
+			translatedCloseButtonLabel,
+			computedTarget,
 			floatingStyles,
 			cdxIconExpand,
 			cdxIconSearch,
+			cdxIconClose,
 			rootClasses,
 			rootStyle,
 			otherAttrs
@@ -574,12 +680,13 @@ export default defineComponent( {
 
 	// Floating container (positioned by Floating UI)
 	&__container {
-		// z-index: @z-index-menu;
 		z-index: @z-index-popover;
 		background-color: @background-color-base;
+		display: flex;
+		flex-direction: column;
 		border: @border-base;
 		border-radius: @border-radius-base;
-		box-shadow: @box-shadow-inset-medium;
+		box-shadow: @box-shadow-medium;
 		overflow: hidden;
 
 		// Mobile responsive
@@ -589,6 +696,27 @@ export default defineComponent( {
 			right: @spacing-50 !important;
 			width: calc( 100vw - @spacing-100 ) !important;
 			max-height: 70vh !important;
+		}
+	}
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		flex-shrink: 0;
+		justify-content: flex-end;
+		padding: @spacing-50 @spacing-50 0 0;
+
+		&__button-wrapper {
+			// Vertically center the button within the wrapper `<div>` element.
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			// Setting the height of the button wrapper to the line-height of the
+			// accompanying text to ensure centering of the button to text
+			height: @line-height-small;
+			// Move the button over so the edge of the icon aligns with the edge of the content.
+			// This makes the quiet button seem to take up less space.
+			margin-right: -@spacing-50;
 		}
 	}
 
@@ -606,6 +734,8 @@ export default defineComponent( {
 	}
 
 	&__languages {
+		flex-grow: 1;
+		flex-shrink: 1;
 		max-height: inherit;
 		overflow-y: auto;
 		padding: @spacing-100;

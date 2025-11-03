@@ -237,6 +237,7 @@ export const I18nMessageKeys = [
 	'cdx-dialog-close-button-label',
 	'cdx-input-chip-aria-description',
 	'cdx-label-optional-flag',
+	'cdx-language-selector-close-button-label',
 	'cdx-message-dismiss-button-label',
 	'cdx-popover-close-button-label',
 	'cdx-search-input-search-button-label',

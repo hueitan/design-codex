@@ -12,6 +12,7 @@
 				v-model:selected="selectedLanguage"
 				:menu-items="allLanguages"
 				:suggested-languages="suggestedLanguages"
+				:use-close-button="true"
 				@update:selected="onLanguageChange"
 			/>
 			<p>
