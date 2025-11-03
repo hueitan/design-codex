@@ -50,7 +50,7 @@
 		"build:vite": "node ./build.mjs",
 		"build:messageKeys": "tsx src/messages.ts",
 		"clean": "rm -rf dist/",
-		"serve": "vite preview",
+		"serve": "vite preview --outDir dist/sandbox --base /",
 		"test": "npm run lint && npm -s run build && npm -s run test:unit",
 		"test:unit": "NODE_OPTIONS=--experimental-vm-modules jest -c .jest/jest.config.json",
 		"test:e2e": "start-server-and-test 'npm run dev' http-get://localhost:5173 'cypress run'",
