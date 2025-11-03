@@ -161,6 +161,7 @@ import {
 	computed,
 	defineComponent,
 	inject,
+	onMounted,
 	ref,
 	toRef,
 	unref,
@@ -522,6 +523,23 @@ export default defineComponent( {
 			}
 		}
 
+		// Check if we're on mobile (tablet breakpoint is 640px)
+		const TABLET_BREAKPOINT = 640;
+		function isMobileViewport(): boolean {
+			return window.innerWidth <= TABLET_BREAKPOINT;
+		}
+
+		// Prevent body scrolling when fullscreen container is open on mobile
+		function updateBodyScrollLock(): void {
+			if ( expanded.value && isMobileViewport() ) {
+				// Add class to prevent body scrolling
+				document.body.classList.add( 'cdx-language-selector-open' );
+			} else {
+				// Remove class to restore body scrolling
+				document.body.classList.remove( 'cdx-language-selector-open' );
+			}
+		}
+
 		// Setup and cleanup event listeners (inspired by Popover)
 		watch( expanded, ( isExpanded ) => {
 			if ( isExpanded ) {
@@ -531,11 +549,26 @@ export default defineComponent( {
 				document.removeEventListener( 'keydown', handleKeydown );
 				document.removeEventListener( 'mousedown', handleClickOutside );
 			}
+			// Update body scroll lock when expanded state changes
+			updateBodyScrollLock();
+		} );
+
+		// Handle window resize to update scroll lock if needed
+		function handleResize(): void {
+			updateBodyScrollLock();
+		}
+
+		onMounted( () => {
+			updateBodyScrollLock();
+			window.addEventListener( 'resize', handleResize );
 		} );
 
 		onUnmounted( () => {
 			document.removeEventListener( 'keydown', handleKeydown );
 			document.removeEventListener( 'mousedown', handleClickOutside );
+			window.removeEventListener( 'resize', handleResize );
+			// Clean up body class on unmount
+			document.body.classList.remove( 'cdx-language-selector-open' );
 		} );
 
 		return {
@@ -794,5 +827,10 @@ export default defineComponent( {
 			opacity: 0.6;
 		}
 	}
+}
+
+// Prevent body scrolling when fullscreen container is open on mobile
+body.cdx-language-selector-open {
+	overflow: hidden;
 }
 </style>
