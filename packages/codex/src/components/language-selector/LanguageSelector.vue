@@ -357,13 +357,10 @@ export default defineComponent( {
 				} ),
 				size( {
 					padding: clipPadding,
-					apply( { rects, elements, availableWidth, availableHeight } ) {
-						// Match input width and set responsive max-width and max-height
-						// const referenceWidth = rects.reference.width;
+					apply( { elements, availableWidth, availableHeight } ) {
 						// Max width possible is the availableWidth up to the max container width
 						const maxWidth = Math.min( maxContainerWidth, availableWidth );
 						Object.assign( elements.floating.style, {
-							// width: `${ referenceWidth }px`,
 							width: `${ Math.max( minContainerWidth, maxWidth ) }px`,
 							maxHeight: `${ Math.min(
 								maxContainerHeight,
@@ -689,13 +686,20 @@ export default defineComponent( {
 		box-shadow: @box-shadow-medium;
 		overflow: hidden;
 
-		// Mobile responsive
-		@media ( max-width: @max-width-breakpoint-mobile ) {
-			// Full width on small screens
-			left: @spacing-50 !important;
-			right: @spacing-50 !important;
-			width: calc( 100vw - @spacing-100 ) !important;
-			max-height: 70vh !important;
+		// Mobile responsive - full screen
+		@media ( max-width: @min-width-breakpoint-tablet ) {
+			// Full screen on mobile
+			position: fixed !important;
+			left: 0 !important;
+			right: 0 !important;
+			top: 0 !important;
+			bottom: 0 !important;
+			width: 100vw !important;
+			height: 100vh !important;
+			max-width: 100vw !important;
+			max-height: 100vh !important;
+			border-radius: 0 !important;
+			transform: unset !important;
 		}
 	}
 
