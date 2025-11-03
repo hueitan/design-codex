@@ -34,104 +34,6 @@ jobs:
           cd packages/codex
           npm run build
 
-      - name: Create index page
-        run: |
-          mkdir -p packages/codex/dist/sandbox
-          cat > packages/codex/dist/sandbox/index.html << 'EOF'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Codex Component Demos</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 40px 20px;
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-              .container {
-                background: white;
-                border-radius: 12px;
-                padding: 40px;
-                max-width: 800px;
-                width: 100%;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-              }
-              h1 {
-                margin: 0 0 10px 0;
-                color: #202122;
-                font-size: 2.5em;
-              }
-              .subtitle {
-                color: #54595d;
-                margin-bottom: 30px;
-                font-size: 1.1em;
-              }
-              .links {
-                display: flex;
-                flex-direction: column;
-                gap: 15px;
-              }
-              .link-card {
-                display: block;
-                padding: 20px;
-                border: 2px solid #e5e5e5;
-                border-radius: 8px;
-                text-decoration: none;
-                color: #202122;
-                transition: all 0.3s ease;
-              }
-              .link-card:hover {
-                border-color: #36c;
-                background-color: #f8f9fa;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-              }
-              .link-card h2 {
-                margin: 0 0 8px 0;
-                color: #36c;
-                font-size: 1.5em;
-              }
-              .link-card p {
-                margin: 0;
-                color: #54595d;
-              }
-              .badge {
-                display: inline-block;
-                background: #36c;
-                color: white;
-                padding: 4px 12px;
-                border-radius: 12px;
-                font-size: 0.85em;
-                margin-left: 10px;
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <h1>Codex Component Demos</h1>
-              <p class="subtitle">Interactive demonstrations of Codex design system components</p>
-              <div class="links">
-                <a href="./index.html" class="link-card">
-                  <h2>Full Sandbox <span class="badge">All Components</span></h2>
-                  <p>View all Codex components in one place with the complete demo sandbox</p>
-                </a>
-                <a href="./demos/" class="link-card">
-                  <h2>All Demos</h2>
-                  <p>Browse all available component demos</p>
-                </a>
-              </div>
-            </div>
-          </body>
-          </html>
-          EOF
-
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -153,4 +55,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Output deployment URL
+        run: |
+          echo "🚀 Demo deployed successfully!"
+          echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"
+          echo "🌐 Your demo is now live at: ${{ steps.deployment.outputs.page_url }}"
 
