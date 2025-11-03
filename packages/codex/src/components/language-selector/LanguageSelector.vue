@@ -33,12 +33,12 @@
 			/>
 		</div>
 
-		<!-- Floating Dropdown Menu -->
+		<!-- Floating Dropdown Container -->
 		<teleport to="body">
 			<div
 				v-if="expanded"
-				ref="floatingMenu"
-				class="cdx-language-selector__menu"
+				ref="floatingContainer"
+				class="cdx-language-selector__container"
 				:style="floatingStyles"
 			>
 				<!-- Languages List -->
@@ -249,16 +249,18 @@ export default defineComponent( {
 	setup( props, { emit, attrs } ) {
 		const inputWrapper = ref<HTMLDivElement>();
 		const input = ref<HTMLDivElement>();
-		const floatingMenu = ref<HTMLDivElement>();
+		const floatingContainer = ref<HTMLDivElement>();
 		const selectedProp = toRef( props, 'selected' );
 		const modelWrapper = useModelWrapper( selectedProp, emit, 'update:selected' );
 		const expanded = ref( false );
 		const searchQuery = ref( '' );
 
-		// Floating UI constants (inspired by Popover and useFloatingMenu)
-		const CLIP_PADDING = 16;
-		const MIN_MENU_HEIGHT = 200;
-		const MAX_MENU_HEIGHT = 400;
+		// Floating UI constants (inspired by Popover)
+		const clipPadding = 16;
+		const minContainerHeight = 200;
+		const maxContainerHeight = 400;
+		const minContainerWidth = 192;
+		const maxContainerWidth = 512;
 
 		const {
 			computedDisabled
@@ -268,20 +270,27 @@ export default defineComponent( {
 		);
 
 		// Setup Floating UI positioning (inspired by Popover)
-		const { floatingStyles } = useFloating( inputWrapper, floatingMenu, {
+		const { floatingStyles } = useFloating( inputWrapper, floatingContainer, {
 			placement: 'bottom-start',
 			middleware: [
 				offset( 4 ),
 				flip( {
-					// padding: CLIP_PADDING
+					padding: clipPadding
 				} ),
 				size( {
-					padding: CLIP_PADDING,
-					apply( { rects, elements, availableHeight } ) {
-						// Match input width and set responsive max-height
+					padding: clipPadding,
+					apply( { rects, elements, availableWidth, availableHeight } ) {
+						// Match input width and set responsive max-width and max-height
+						const referenceWidth = rects.reference.width;
+						// Max width possible is the availableWidth up to the max container width
+						const maxWidth = Math.min( maxContainerWidth, availableWidth );
 						Object.assign( elements.floating.style, {
-							width: `${ rects.reference.width }px`,
-							maxHeight: `${ Math.min( MAX_MENU_HEIGHT, Math.max( MIN_MENU_HEIGHT, availableHeight ) ) }px`
+							width: `${ referenceWidth }px`,
+							maxWidth: `${ Math.max( minContainerWidth, maxWidth ) }px`,
+							maxHeight: `${ Math.min(
+								maxContainerHeight,
+								Math.max( minContainerHeight, availableHeight )
+							) }px`
 						} );
 					}
 				} )
@@ -407,9 +416,9 @@ export default defineComponent( {
 		function handleClickOutside( event: MouseEvent ): void {
 			if (
 				expanded.value &&
-				floatingMenu.value &&
+				floatingContainer.value &&
 				inputWrapper.value &&
-				!floatingMenu.value.contains( event.target as Node ) &&
+				!floatingContainer.value.contains( event.target as Node ) &&
 				!inputWrapper.value.contains( event.target as Node )
 			) {
 				expanded.value = false;
@@ -435,7 +444,7 @@ export default defineComponent( {
 		return {
 			inputWrapper,
 			input,
-			floatingMenu,
+			floatingContainer,
 			expanded,
 			searchQuery,
 			computedDisabled,
@@ -563,8 +572,8 @@ export default defineComponent( {
 		}
 	}
 
-	// Floating menu (positioned by Floating UI)
-	&__menu {
+	// Floating container (positioned by Floating UI)
+	&__container {
 		// z-index: @z-index-menu;
 		z-index: @z-index-popover;
 		background-color: @background-color-base;
