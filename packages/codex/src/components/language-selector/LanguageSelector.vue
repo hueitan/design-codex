@@ -5,7 +5,11 @@
 		:style="rootStyle"
 	>
 		<!-- Input -->
-		<div class="cdx-language-selector__input-wrapper" @click="onInputClick">
+		<div
+			ref="inputWrapper"
+			class="cdx-language-selector__input-wrapper"
+			@click="onInputClick"
+		>
 			<cdx-text-input
 				ref="input"
 				v-model="inputValue"
@@ -29,89 +33,91 @@
 			/>
 		</div>
 
-		<!-- Dropdown Menu -->
-		<div
-			v-if="expanded"
-			:id="menuId"
-			ref="menu"
-			class="cdx-language-selector__menu"
-		>
-			<!-- Languages List -->
-			<div class="cdx-language-selector__languages">
-				<div class="cdx-language-selector__languages-list">
-					<!-- Suggested Languages Section -->
-					<template v-if="!searchQuery && suggestedLanguages.length > 0">
-						<div class="cdx-language-selector__section-header">
-							Suggested
-						</div>
-						<button
-							v-for="lang in suggestedLanguages"
-							:key="lang.value"
-							class="cdx-language-selector__language-item"
-							:class="{
-								'cdx-language-selector__language-item--selected':
-									lang.value === modelWrapper
-							}"
-							@click="selectLanguage( lang.value )"
-						>
-							<span class="cdx-language-selector__language-name">
-								{{ lang.label }}
-							</span>
-						</button>
-					</template>
+		<!-- Floating Dropdown Menu -->
+		<teleport to="body">
+			<div
+				v-if="expanded"
+				ref="floatingMenu"
+				class="cdx-language-selector__menu"
+				:style="floatingStyles"
+			>
+				<!-- Languages List -->
+				<div class="cdx-language-selector__languages">
+					<div class="cdx-language-selector__languages-list">
+						<!-- Suggested Languages Section -->
+						<template v-if="!searchQuery && suggestedLanguages.length > 0">
+							<div class="cdx-language-selector__section-header">
+								Suggested
+							</div>
+							<button
+								v-for="lang in suggestedLanguages"
+								:key="lang.value"
+								class="cdx-language-selector__language-item"
+								:class="{
+									'cdx-language-selector__language-item--selected':
+										lang.value === modelWrapper
+								}"
+								@click="selectLanguage( lang.value )"
+							>
+								<span class="cdx-language-selector__language-name">
+									{{ lang.label }}
+								</span>
+							</button>
+						</template>
 
-					<!-- All Languages Section -->
-					<template v-if="!searchQuery">
-						<div class="cdx-language-selector__section-header">
-							All
-						</div>
-						<button
-							v-for="lang in allLanguages"
-							:key="lang.value"
-							class="cdx-language-selector__language-item"
-							:class="{
-								'cdx-language-selector__language-item--selected':
-									lang.value === modelWrapper
-							}"
-							@click="selectLanguage( lang.value )"
-						>
-							<span class="cdx-language-selector__language-name">
-								{{ lang.label }}
-							</span>
-						</button>
-					</template>
+						<!-- All Languages Section -->
+						<template v-if="!searchQuery">
+							<div class="cdx-language-selector__section-header">
+								All
+							</div>
+							<button
+								v-for="lang in allLanguages"
+								:key="lang.value"
+								class="cdx-language-selector__language-item"
+								:class="{
+									'cdx-language-selector__language-item--selected':
+										lang.value === modelWrapper
+								}"
+								@click="selectLanguage( lang.value )"
+							>
+								<span class="cdx-language-selector__language-name">
+									{{ lang.label }}
+								</span>
+							</button>
+						</template>
 
-					<!-- Search Results Section -->
-					<template v-if="searchQuery">
-						<div class="cdx-language-selector__section-header">
-							Search Results
-						</div>
-						<button
-							v-for="lang in filteredLanguages"
-							:key="lang.value"
-							class="cdx-language-selector__language-item"
-							:class="{
-								'cdx-language-selector__language-item--selected':
-									lang.value === modelWrapper
-							}"
-							@click="selectLanguage( lang.value )"
-						>
-							<span class="cdx-language-selector__language-name">
-								{{ lang.label }}
-							</span>
-						</button>
-					</template>
+						<!-- Search Results Section -->
+						<template v-if="searchQuery">
+							<div class="cdx-language-selector__section-header">
+								Search Results
+							</div>
+							<button
+								v-for="lang in filteredLanguages"
+								:key="lang.value"
+								class="cdx-language-selector__language-item"
+								:class="{
+									'cdx-language-selector__language-item--selected':
+										lang.value === modelWrapper
+								}"
+								@click="selectLanguage( lang.value )"
+							>
+								<span class="cdx-language-selector__language-name">
+									{{ lang.label }}
+								</span>
+							</button>
+						</template>
+					</div>
+				</div>
+
+				<!-- No Results -->
+				<div
+					v-if="searchQuery && filteredLanguages.length === 0"
+					class="cdx-language-selector__no-results"
+				>
+					No languages found
 				</div>
 			</div>
-
-			<!-- No Results -->
-			<div
-				v-if="searchQuery && filteredLanguages.length === 0"
-				class="cdx-language-selector__no-results"
-			>
-				No languages found
-			</div>
-		</div>
+		</teleport>
 	</div>
 </template>
 
@@ -123,8 +129,9 @@ import {
 	ref,
 	toRef,
 	watch,
-	useId
+	onUnmounted
 } from 'vue';
+import { useFloating, offset, flip, size, autoUpdate } from '@floating-ui/vue';
 import { cdxIconExpand, cdxIconSearch } from '@wikimedia/codex-icons';
 
 import CdxTextInput from '../text-input/TextInput.vue';
@@ -240,13 +247,18 @@ export default defineComponent( {
 	],
 
 	setup( props, { emit, attrs } ) {
+		const inputWrapper = ref<HTMLDivElement>();
 		const input = ref<HTMLDivElement>();
-		const menu = ref<HTMLDivElement>();
-		const menuId = useId();
+		const floatingMenu = ref<HTMLDivElement>();
 		const selectedProp = toRef( props, 'selected' );
 		const modelWrapper = useModelWrapper( selectedProp, emit, 'update:selected' );
 		const expanded = ref( false );
 		const searchQuery = ref( '' );
+
+		// Floating UI constants (inspired by Popover and useFloatingMenu)
+		const CLIP_PADDING = 16;
+		const MIN_MENU_HEIGHT = 200;
+		const MAX_MENU_HEIGHT = 400;
 
 		const {
 			computedDisabled
@@ -254,6 +266,28 @@ export default defineComponent( {
 			toRef( props, 'disabled' ),
 			toRef( props, 'status' )
 		);
+
+		// Setup Floating UI positioning (inspired by Popover)
+		const { floatingStyles } = useFloating( inputWrapper, floatingMenu, {
+			placement: 'bottom-start',
+			middleware: [
+				offset( 4 ),
+				flip( {
+					// padding: CLIP_PADDING
+				} ),
+				size( {
+					padding: CLIP_PADDING,
+					apply( { rects, elements, availableHeight } ) {
+						// Match input width and set responsive max-height
+						Object.assign( elements.floating.style, {
+							width: `${ rects.reference.width }px`,
+							maxHeight: `${ Math.min( MAX_MENU_HEIGHT, Math.max( MIN_MENU_HEIGHT, availableHeight ) ) }px`
+						} );
+					}
+				} )
+			],
+			whileElementsMounted: autoUpdate
+		} );
 
 		const internalClasses = computed( () => ( {
 			'cdx-language-selector--expanded': expanded.value,
@@ -349,12 +383,6 @@ export default defineComponent( {
 		}
 
 		function onInputBlur( event: FocusEvent ): void {
-			// Close menu when focus leaves the component
-			setTimeout( () => {
-				if ( !menu.value?.contains( document.activeElement ) ) {
-					expanded.value = false;
-				}
-			}, 100 );
 			emit( 'blur', event );
 		}
 
@@ -368,31 +396,46 @@ export default defineComponent( {
 			}, 0 );
 		}
 
-		// Close menu when clicking outside
+		// Close on Escape key (inspired by Popover)
+		function handleKeydown( event: KeyboardEvent ): void {
+			if ( event.key === 'Escape' && expanded.value ) {
+				expanded.value = false;
+			}
+		}
+
+		// Close on click outside (inspired by Popover)
 		function handleClickOutside( event: MouseEvent ): void {
 			if (
 				expanded.value &&
-				menu.value &&
-				!menu.value.contains( event.target as Node ) &&
-				!input.value?.contains( event.target as Node )
+				floatingMenu.value &&
+				inputWrapper.value &&
+				!floatingMenu.value.contains( event.target as Node ) &&
+				!inputWrapper.value.contains( event.target as Node )
 			) {
 				expanded.value = false;
 			}
 		}
 
-		// Add click outside listener
+		// Setup and cleanup event listeners (inspired by Popover)
 		watch( expanded, ( isExpanded ) => {
 			if ( isExpanded ) {
-				document.addEventListener( 'click', handleClickOutside );
+				document.addEventListener( 'keydown', handleKeydown );
+				document.addEventListener( 'mousedown', handleClickOutside );
 			} else {
-				document.removeEventListener( 'click', handleClickOutside );
+				document.removeEventListener( 'keydown', handleKeydown );
+				document.removeEventListener( 'mousedown', handleClickOutside );
 			}
 		} );
 
+		onUnmounted( () => {
+			document.removeEventListener( 'keydown', handleKeydown );
+			document.removeEventListener( 'mousedown', handleClickOutside );
+		} );
+
 		return {
+			inputWrapper,
 			input,
-			menu,
-			menuId,
+			floatingMenu,
 			expanded,
 			searchQuery,
 			computedDisabled,
@@ -407,6 +450,7 @@ export default defineComponent( {
 			onInputFocus,
 			onInputBlur,
 			selectLanguage,
+			floatingStyles,
 			cdxIconExpand,
 			cdxIconSearch,
 			rootClasses,
@@ -519,19 +563,24 @@ export default defineComponent( {
 		}
 	}
 
+	// Floating menu (positioned by Floating UI)
 	&__menu {
-		position: absolute;
-		top: 100%;
-		left: 0;
-		right: 0;
-		z-index: 1000;
-		margin-top: @spacing-25;
+		// z-index: @z-index-menu;
+		z-index: @z-index-popover;
 		background-color: @background-color-base;
-		border: 1px solid @border-color-base;
+		border: @border-base;
 		border-radius: @border-radius-base;
-		box-shadow: @box-shadow-drop-medium;
-		max-height: 400px;
+		box-shadow: @box-shadow-inset-medium;
 		overflow: hidden;
+
+		// Mobile responsive
+		@media ( max-width: @max-width-breakpoint-mobile ) {
+			// Full width on small screens
+			left: @spacing-50 !important;
+			right: @spacing-50 !important;
+			width: calc( 100vw - @spacing-100 ) !important;
+			max-height: 70vh !important;
+		}
 	}
 
 	&__section-header {
@@ -548,9 +597,9 @@ export default defineComponent( {
 	}
 
 	&__languages {
-		max-height: 200px;
+		max-height: inherit;
 		overflow-y: auto;
-        padding: @spacing-100;
+		padding: @spacing-100;
 	}
 
 	&__language-item {
@@ -559,13 +608,13 @@ export default defineComponent( {
 		justify-content: space-between;
 		width: 100%;
 		padding: @spacing-75 @spacing-100;
-		border: none;
+		border: 0;
 		background: none;
 		color: @color-base;
 		font-size: @font-size-medium;
 		cursor: pointer;
-		transition: background-color 0.2s ease;
-		text-align: left;
+		transition: background-color @transition-duration-base ease;
+		text-align: start;
 
 		&:hover {
 			background-color: @background-color-progressive-subtle;
@@ -574,6 +623,12 @@ export default defineComponent( {
 		&--selected {
 			background-color: @background-color-progressive;
 			color: @color-inverted;
+		}
+
+		// Mobile: larger touch targets
+		@media ( max-width: @max-width-breakpoint-mobile ) {
+			padding: @spacing-100 @spacing-150;
+			font-size: @font-size-large;
 		}
 	}
 
