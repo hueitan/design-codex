@@ -5,7 +5,7 @@
 			Codex Demo Sandbox
 		</template>
 		<template #content>
-			<accordion-demo />
+			<!-- <accordion-demo />
 			<breadcrumb-demo />
 			<button-demo />
 			<button-group-demo />
@@ -20,17 +20,17 @@
 			<icon-demo />
 			<image-demo />
 			<info-chip-demo />
-			<label-demo />
+			<label-demo /> -->
 			<language-selector-demo />
-			<link-demo />
+			<!-- <link-demo />
 			<lookup-demo />
 			<multiselect-lookup-demo />
 			<menu-demo />
 			<menu-item-demo />
 			<menu-button-demo />
-			<message-demo />
+			<message-demo /> -->
 			<popover-demo />
-			<progress-bar-demo />
+			<!-- <progress-bar-demo />
 			<progress-indicator-demo />
 			<radio-demo />
 			<search-input-demo />
@@ -44,7 +44,7 @@
 			<toggle-demo />
 			<tooltip-demo />
 			<typeahead-search-demo />
-			<typography-demo />
+			<typography-demo /> -->
 		</template>
 		<template #sideNav>
 			<ul class="cdx-demo__nav-list">
@@ -67,89 +67,88 @@
 import { provide } from 'vue';
 import DemoBaseLayout from './DemoBaseLayout.vue';
 
-import AccordionDemo from './AccordionDemo.vue';
-import BreadcrumbDemo from './BreadcrumbDemo.vue';
-import ButtonDemo from './ButtonDemo.vue';
-import ButtonGroupDemo from './ButtonGroupDemo.vue';
-import CardDemo from './CardDemo.vue';
-import CheckboxDemo from './CheckboxDemo.vue';
-import ChipInputDemo from './ChipInputDemo.vue';
-import ContainerDemo from './ContainerDemo.vue';
-import GridDemo from './GridDemo.vue';
-import MultiselectLookupDemo from './MultiselectLookupDemo.vue';
-import ComboboxDemo from './ComboboxDemo.vue';
-import DialogDemo from './DialogDemo.vue';
-import FieldDemo from './FieldDemo.vue';
-import IconDemo from './IconDemo.vue';
-import ImageDemo from './ImageDemo.vue';
-import InfoChipDemo from './InfoChipDemo.vue';
-import LabelDemo from './LabelDemo.vue';
+// import AccordionDemo from './AccordionDemo.vue';
+// import BreadcrumbDemo from './BreadcrumbDemo.vue';
+// import ButtonDemo from './ButtonDemo.vue';
+// import ButtonGroupDemo from './ButtonGroupDemo.vue';
+// import CardDemo from './CardDemo.vue';
+// import CheckboxDemo from './CheckboxDemo.vue';
+// import ChipInputDemo from './ChipInputDemo.vue';
+// import ContainerDemo from './ContainerDemo.vue';
+// import GridDemo from './GridDemo.vue';
+// import MultiselectLookupDemo from './MultiselectLookupDemo.vue';
+// import ComboboxDemo from './ComboboxDemo.vue';
+// import DialogDemo from './DialogDemo.vue';
+// import FieldDemo from './FieldDemo.vue';
+// import IconDemo from './IconDemo.vue';
+// import ImageDemo from './ImageDemo.vue';
+// import InfoChipDemo from './InfoChipDemo.vue';
+// import LabelDemo from './LabelDemo.vue';
 import LanguageSelectorDemo from './LanguageSelectorDemo.vue';
-import LookupDemo from './LookupDemo.vue';
-import MenuDemo from './MenuDemo.vue';
-import MenuItemDemo from './MenuItemDemo.vue';
-import MenuButtonDemo from './MenuButtonDemo.vue';
-import MessageDemo from './MessageDemo.vue';
+// import LookupDemo from './LookupDemo.vue';
+// import MenuDemo from './MenuDemo.vue';
+// import MenuItemDemo from './MenuItemDemo.vue';
+// import MenuButtonDemo from './MenuButtonDemo.vue';
+// import MessageDemo from './MessageDemo.vue';
 import PopoverDemo from './PopoverDemo.vue';
-import ProgressBarDemo from './ProgressBarDemo.vue';
-import ProgressIndicatorDemo from './ProgressIndicatorDemo.vue';
-import RadioDemo from './RadioDemo.vue';
-import SearchInputDemo from './SearchInputDemo.vue';
-import SelectDemo from './SelectDemo.vue';
-import TableDemo from './TableDemo.vue';
-import TabsDemo from './TabsDemo.vue';
-import TextAreaDemo from './TextAreaDemo.vue';
-import TextInputDemo from './TextInputDemo.vue';
-import ThumbnailDemo from './ThumbnailDemo.vue';
-import ToggleButtonGroupDemo from './ToggleButtonGroupDemo.vue';
-import ToggleDemo from './ToggleDemo.vue';
-import TooltipDemo from './TooltipDemo.vue';
-import TypeaheadSearchDemo from './TypeaheadSearchDemo.vue';
-import LinkDemo from './LinkDemo.vue';
-import TypographyDemo from './TypographyDemo.vue';
+// import ProgressBarDemo from './ProgressBarDemo.vue';
+// import ProgressIndicatorDemo from './ProgressIndicatorDemo.vue';
+// import RadioDemo from './RadioDemo.vue';
+// import SearchInputDemo from './SearchInputDemo.vue';
+// import SelectDemo from './SelectDemo.vue';
+// import TableDemo from './TableDemo.vue';
+// import TabsDemo from './TabsDemo.vue';
+// import TextAreaDemo from './TextAreaDemo.vue';
+// import TextInputDemo from './TextInputDemo.vue';
+// import ThumbnailDemo from './ThumbnailDemo.vue';
+// import ToggleButtonGroupDemo from './ToggleButtonGroupDemo.vue';
+// import ToggleDemo from './ToggleDemo.vue';
+// import TooltipDemo from './TooltipDemo.vue';
+// import TypeaheadSearchDemo from './TypeaheadSearchDemo.vue';
+// import LinkDemo from './LinkDemo.vue';
+// import TypographyDemo from './TypographyDemo.vue';
 
 const demoSections = [
-	{ name: 'Accordion', id: '#cdx-accordion' },
-	{ name: 'Breadcrumb', id: '#cdx-breadcrumb' },
-	{ name: 'Button', id: '#cdx-button' },
-	{ name: 'ButtonGroup', id: '#cdx-button-group' },
-	{ name: 'Card', id: '#cdx-card' },
-	{ name: 'CheckBox', id: '#cdx-checkbox' },
-	{ name: 'ChipInput', id: '#cdx-chip-input' },
-	{ name: 'Combobox', id: '#cdx-combobox' },
-	{ name: 'Container', id: '#cdx-container' },
-	{ name: 'Grid', id: '#cdx-grid' },
-	{ name: 'Dialog', id: '#cdx-dialog' },
-	{ name: 'Field', id: '#cdx-field' },
-	{ name: 'Icon', id: '#cdx-icon' },
-	{ name: 'Image', id: '#cdx-image' },
-	{ name: 'InfoChip', id: '#cdx-info-chip' },
-	{ name: 'Label', id: '#cdx-label' },
+	// { name: 'Accordion', id: '#cdx-accordion' },
+	// { name: 'Breadcrumb', id: '#cdx-breadcrumb' },
+	// { name: 'Button', id: '#cdx-button' },
+	// { name: 'ButtonGroup', id: '#cdx-button-group' },
+	// { name: 'Card', id: '#cdx-card' },
+	// { name: 'CheckBox', id: '#cdx-checkbox' },
+	// { name: 'ChipInput', id: '#cdx-chip-input' },
+	// { name: 'Combobox', id: '#cdx-combobox' },
+	// { name: 'Container', id: '#cdx-container' },
+	// { name: 'Grid', id: '#cdx-grid' },
+	// { name: 'Dialog', id: '#cdx-dialog' },
+	// { name: 'Field', id: '#cdx-field' },
+	// { name: 'Icon', id: '#cdx-icon' },
+	// { name: 'Image', id: '#cdx-image' },
+	// { name: 'InfoChip', id: '#cdx-info-chip' },
+	// { name: 'Label', id: '#cdx-label' },
 	{ name: 'LanguageSelector', id: '#cdx-language-selector' },
-
-	{ name: 'Link', id: '#cdx-link' },
-	{ name: 'Lookup', id: '#cdx-lookup' },
-	{ name: 'MultiselectLookup', id: '#cdx-multiselect-lookup' },
-	{ name: 'Menu', id: '#cdx-menu' },
-	{ name: 'MenuItem', id: '#cdx-menu-item' },
-	{ name: 'MenuButton', id: '#cdx-menu-button' },
-	{ name: 'Message', id: '#cdx-message' },
+	// { name: 'Link', id: '#cdx-link' },
+	// { name: 'Lookup', id: '#cdx-lookup' },
+	// { name: 'MultiselectLookup', id: '#cdx-multiselect-lookup' },
+	// { name: 'Menu', id: '#cdx-menu' },
+	// { name: 'MenuItem', id: '#cdx-menu-item' },
+	// { name: 'MenuButton', id: '#cdx-menu-button' },
+	// { name: 'Message', id: '#cdx-message' },
 	{ name: 'Popover', id: '#cdx-popover' },
-	{ name: 'ProgressBar', id: '#cdx-progress-bar' },
-	{ name: 'ProgressIndicator', id: '#cdx-progress-indicator' },
-	{ name: 'Radio', id: '#cdx-radio' },
-	{ name: 'SearchInput', id: '#cdx-search-input' },
-	{ name: 'Select', id: '#cdx-select' },
-	{ name: 'Table', id: '#cdx-table' },
-	{ name: 'Tabs', id: '#cdx-tabs' },
-	{ name: 'TextArea', id: '#cdx-text-area' },
-	{ name: 'TextInput', id: '#cdx-text-input' },
-	{ name: 'Thumbnail', id: '#cdx-thumbnail' },
-	{ name: 'ToggleButton and ToggleSwitch', id: '#cdx-toggle' },
-	{ name: 'ToggleButtonGroup', id: '#cdx-toggle-button-group' },
-	{ name: 'Tooltip', id: '#cdx-tooltip' },
-	{ name: 'TypeaheadSearch', id: '#cdx-typeahead-search' },
-	{ name: 'Typography', id: '#cdx-typography' }
+	// { name: 'ProgressBar', id: '#cdx-progress-bar' },
+	// { name: 'ProgressIndicator', id: '#cdx-progress-indicator' },
+	// { name: 'Radio', id: '#cdx-radio' },
+	// { name: 'SearchInput', id: '#cdx-search-input' },
+	// { name: 'Select', id: '#cdx-select' },
+	// { name: 'Table', id: '#cdx-table' },
+	// { name: 'Tabs', id: '#cdx-tabs' },
+	// { name: 'TextArea', id: '#cdx-text-area' },
+	// { name: 'TextInput', id: '#cdx-text-input' },
+	// { name: 'Thumbnail', id: '#cdx-thumbnail' },
+	// { name: 'ToggleButton and ToggleSwitch', id: '#cdx-toggle' },
+	// { name: 'ToggleButtonGroup', id: '#cdx-toggle-button-group' },
+	// { name: 'Tooltip', id: '#cdx-tooltip' },
+	// { name: 'TypeaheadSearch', id: '#cdx-typeahead-search' },
+	// { name: 'Typography', id: '#cdx-typography' }
 ];
 
 provide( 'CdxTeleportTarget', '#teleport-target' );

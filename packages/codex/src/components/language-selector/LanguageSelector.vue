@@ -17,12 +17,12 @@
 
 		<!-- Floating Dropdown Container -->
 		<teleport :to="computedTarget" :disabled="renderInPlace">
-			<div
-				v-if="expanded"
-				ref="floatingContainer"
-				class="cdx-language-selector__container"
-				:style="floatingStyles"
-			>
+<div
+	v-if="expanded"
+	ref="floatingContainer"
+	class="cdx-language-selector__container"
+	:style="floatingStyles"
+>
 				<!-- Input Wrapper -->
 				<div
 					ref="inputWrapper"
@@ -719,21 +719,21 @@ export default defineComponent( {
 		box-shadow: @box-shadow-medium;
 		overflow: hidden;
 
-		// Mobile responsive - full screen
-		@media ( max-width: @min-width-breakpoint-tablet ) {
-			// Full screen on mobile
-			position: fixed !important;
-			left: 0 !important;
-			right: 0 !important;
-			top: 0 !important;
-			bottom: 0 !important;
-			width: 100vw !important;
-			height: 100vh !important;
-			max-width: 100vw !important;
-			max-height: 100vh !important;
-			border-radius: 0 !important;
-			transform: unset !important;
-		}
+// Mobile responsive - full screen
+@media ( max-width: @min-width-breakpoint-tablet ) {
+	// Full screen on mobile
+	position: fixed !important;
+	left: 0 !important;
+	right: 0 !important;
+	top: 0 !important;
+	bottom: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	max-width: 100vw !important;
+	max-height: 100vh !important;
+	border-radius: 0 !important;
+	transform: unset !important;
+}
 	}
 
 	&__header {
@@ -834,3 +834,19 @@ body.cdx-language-selector-open {
 	overflow: hidden;
 }
 </style>
+
+const { floatingStyles } = useFloating( buttonElement, floatingContainer, {
+    placement: 'bottom-start',
+    middleware: [
+    size( {
+    padding: clipPadding,
+    apply( { elements, availableWidth, availableHeight } ) {
+    // main logic to calculate the width height of the floating container
+    Object.assign( elements.floating.style, {
+    width,
+    maxHeight,
+    } );
+    }
+    } )
+    ]
+} );
