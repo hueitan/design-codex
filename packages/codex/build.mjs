@@ -61,7 +61,7 @@ const demoFiles = readdirSync( resolve( __dirname, 'demos' ) )
 	.map( ( file ) => resolve( __dirname, 'demos', file ) );
 
 const sandboxConfig = mergeConfig( baseConfig, {
-	base: process.env.CODEX_DOC_ROOT ? `${ process.env.CODEX_DOC_ROOT }/sandbox/` : '/',
+	base: process.env.CODEX_DOC_ROOT ? `${ process.env.CODEX_DOC_ROOT }/sandbox/` : './',
 	build: {
 		outDir: 'dist/sandbox',
 		rollupOptions: {
